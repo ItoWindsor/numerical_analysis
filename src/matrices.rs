@@ -1,45 +1,65 @@
-pub struct Matrices_t<T> {
-    nrows : usize,
-    ncols : usize,
+pub struct Matrix_t<T : num::Num + Default + Clone> {
+    nrows : u32,
+    ncols : u32,
     values : Vec<T>,
 }
 
-impl<T> Matrices_t<T> {
-    pub fn new(nrows : usize, ncols : usize, values : Vec<T>) -> Self {
-        return Self { nrows : nrows, ncols : ncols, values : values};
+
+impl<T : num::Num + Default + Clone> Matrix_t<T> {
+    pub fn new(nrows : u32, ncols : u32, values : Vec<T>) -> Matrix_t<T>{
+        assert_eq!(values.len() as u32, nrows*ncols);
+        return Self {nrows, ncols, values};
     }
 }
 
-// TODO Add a method to get values like Mat[i][k]
+impl<T : num::Num + Default + Clone> Matrix_t<T> {
+    pub fn new_empty(nrows : u32, ncols : u32) -> Self { 
+    let values = vec![T::default(); (nrows*ncols) as usize];
+    return Self {nrows, ncols, values};
+    }
+}
 
-//impl<T> std::ops::Index<usize> for Matrices_t<T> {
-//    type Output = [T];
-//
-//    fn index(&self, row_index : usize) -> &Self::Output {
-//        assert!(row_index < self.nrows);
-//        let start = row_index * self.nrows;
-//        let end = start + self.ncols;
-//        return &self.values[start..end];
-//    }
-//}
-//
+// TODO Add a method to get the shape of the matrix like np.shape() 
+impl<T : num::Num + Default + Clone> Matrix_t<T> {
+    pub fn get_shape(&self) -> (u32,u32) {
+        let res : (u32,u32) = (self.nrows, self.ncols);
+        return res;
+    }
+}
 
 
+impl<T : num::Num + Default + Clone> Matrix_t<T> {
+    fn index(&self, row : u32, col : u32) -> usize {
+        return ((row*self.ncols) + col).try_into().unwrap();
+    }
+}
+
+impl<T : num::Num + Default + Clone> std::ops::Index<(u32,u32)> for Matrix_t<T> {
+    type Output = T;
+    
+    fn index(&self, index : (u32,u32)) -> &Self::Output {
+        let (row,col) = index;
+        return &self.values[self.index(row,col)];
+    }
+}
+
+
+// TODO : Add a method to create a matrix from an array of array ( [ [0,1,2],[3,4,5],[6,7,8]  ] )
 
 // TODO Add a method to show the matrix 
 
-// //impl<T> std::fmt::Display for Matrices_t<T> {
-//    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//        let mut res : String;
-//        for i in 0..self.nrows-1 {
-//            for j in 0..self.ncols-1 {
-//                res.push_str(self.values[self.nrows*i + k*self.ncols]); 
-//            }
-//            res.push_str("\n");
-//        }
-//        return write!(f, "test matrices");
-//    }
-//}
+impl<T : num::Num + Default + Clone + std::fmt::Debug> std::fmt::Display for Matrix_t<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut res : String = String::new();
+        for i in 0..self.nrows {
+            for j in 0..self.ncols {
+               res.push_str(&format!("{:?}",self[(i,j)])); 
+            }
+            res.push_str("\n");
+        }
+        return write!(f,"{}",res);
+    }
+}
 
 
 // TODO Add a method to sum two matrices
