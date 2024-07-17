@@ -64,13 +64,14 @@ impl<T : num::Num + Default + Clone + std::fmt::Debug> std::fmt::Display for Mat
 
 // TODO Add a method to sum two matrices
 
-//impl<T> std::ops::Add<Matrices_t<T> > for Matrices_t<T> {
-//    type Output = Matrices_t<T>;
-//    fn add(self, mat2 : Matrices_t<T>) -> Matrices_t<T> {
-//       //assert!(self.nrows == mat2.nrows & self.ncols == mat2.ncols); 
-//        
-//    }
-//}
+impl<T : num::Num + Default + Clone> std::ops::Add<Matrix_t<T> > for Matrix_t<T> {
+    type Output = Matrix_t<T>;
+    fn add(self, mat2 : Matrix_t<T>) -> Matrix_t<T> {
+       assert!((self.nrows == mat2.nrows) & (self.ncols == mat2.ncols)); 
+       let new_vec : Vec<T> = self.values.into_iter().zip(mat2.values.into_iter()).map(|(a,b)| a+b).collect();
+       return Matrix_t {nrows : self.nrows, ncols : self.ncols, values : new_vec};
+    }
+}
 
 // TODO Add a method to compute product of two matrices
 //
