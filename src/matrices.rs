@@ -1,26 +1,25 @@
-pub struct Matrix_t<T : num::Num + Default + Clone> {
+pub struct Matrix_t<T : num::Num + Default + Clone + Copy> {
     nrows : u32,
     ncols : u32,
     values : Vec<T>,
 }
 
 
-impl<T : num::Num + Default + Clone> Matrix_t<T> {
+impl<T : num::Num + Default + Clone + Copy> Matrix_t<T> {
     pub fn new(nrows : u32, ncols : u32, values : Vec<T>) -> Matrix_t<T>{
         assert_eq!(values.len() as u32, nrows*ncols);
         return Self {nrows, ncols, values};
     }
-}
 
-impl<T : num::Num + Default + Clone> Matrix_t<T> {
     pub fn new_empty(nrows : u32, ncols : u32) -> Self { 
-    let values = vec![T::default(); (nrows*ncols) as usize];
-    return Self {nrows, ncols, values};
+        let values = vec![T::default(); (nrows*ncols) as usize];
+        return Self {nrows, ncols, values};
     }
 }
 
-// TODO Add a method to get the shape of the matrix like np.shape() 
-impl<T : num::Num + Default + Clone> Matrix_t<T> {
+
+// TODO : Add a method to get the shape of the matrix like np.shape() 
+impl<T : num::Num + Default + Clone + Copy> Matrix_t<T> {
     pub fn get_shape(&self) -> (u32,u32) {
         let res : (u32,u32) = (self.nrows, self.ncols);
         return res;
@@ -28,13 +27,13 @@ impl<T : num::Num + Default + Clone> Matrix_t<T> {
 }
 
 
-impl<T : num::Num + Default + Clone> Matrix_t<T> {
+impl<T : num::Num + Default + Clone + Copy> Matrix_t<T> {
     fn index(&self, row : u32, col : u32) -> usize {
         return ((row*self.ncols) + col).try_into().unwrap();
     }
 }
 
-impl<T : num::Num + Default + Clone> std::ops::Index<(u32,u32)> for Matrix_t<T> {
+impl<T : num::Num + Default + Clone + Copy> std::ops::Index<(u32,u32)> for Matrix_t<T> {
     type Output = T;
     
     fn index(&self, index : (u32,u32)) -> &Self::Output {
@@ -46,9 +45,23 @@ impl<T : num::Num + Default + Clone> std::ops::Index<(u32,u32)> for Matrix_t<T> 
 
 // TODO : Add a method to create a matrix from an array of array ( [ [0,1,2],[3,4,5],[6,7,8]  ] )
 
-// TODO Add a method to show the matrix 
+//impl<T : num::Num + Default + Clone + Copy> Matrix_t<T> 
+//    pub fn from_array() {
+//    }
+//}
 
-impl<T : num::Num + Default + Clone + std::fmt::Debug> std::fmt::Display for Matrix_t<T> {
+
+
+// TODO : Implement a clone method 
+impl<T : num::Num + Default + Clone + Copy> Clone for Matrix_t<T> {
+    fn clone(&self) -> Self {
+        return  Matrix_t {nrows : self.nrows, ncols : self.ncols, values : self.values.clone()};
+    }
+}
+
+
+// TODO: Add a method to show the matrix 
+impl<T : num::Num + Default + Clone + std::fmt::Debug + Copy> std::fmt::Display for Matrix_t<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut res : String = String::new();
         for i in 0..self.nrows {
@@ -61,19 +74,19 @@ impl<T : num::Num + Default + Clone + std::fmt::Debug> std::fmt::Display for Mat
     }
 }
 
-
-// TODO Add a method to sum two matrices
-
-impl<T : num::Num + Default + Clone> std::ops::Add<Matrix_t<T> > for Matrix_t<T> {
+// TODO : Add a method to sum two matrices
+impl<T : num::Num + Default + Clone + Copy> std::ops::Add<&Matrix_t<T> > for &Matrix_t<T> {
     type Output = Matrix_t<T>;
-    fn add(self, mat2 : Matrix_t<T>) -> Matrix_t<T> {
-       assert!((self.nrows == mat2.nrows) & (self.ncols == mat2.ncols)); 
-       let new_vec : Vec<T> = self.values.into_iter().zip(mat2.values.into_iter()).map(|(a,b)| a+b).collect();
+    fn add(self, mat2 : &Matrix_t<T>) -> Matrix_t<T> {
+        assert!((self.nrows == mat2.nrows) & (self.ncols == mat2.ncols));
+        let vec1 : Vec<T> = self.values.clone();
+        let vec2 : Vec<T> = mat2.values.clone();
+        let new_vec : Vec<T> = vec1.into_iter().zip(vec2.into_iter()).map(|(a,b)| a+b).collect();
        return Matrix_t {nrows : self.nrows, ncols : self.ncols, values : new_vec};
     }
 }
 
-// TODO Add a method to compute product of two matrices
+// TODO : Add a method to compute product of two matrices
 //
 // impl<T> std::ops::Mul<Matrices_t<T> > for Matrices_t<T> {
 //  type Output = Matrices_t<T>;
