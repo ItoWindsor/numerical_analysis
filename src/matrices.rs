@@ -15,6 +15,14 @@ impl<T : num::Num + Default + Clone + Copy> Matrix_t<T> {
         let values = vec![T::default(); (nrows*ncols) as usize];
         return Self {nrows, ncols, values};
     }
+
+    pub fn new_identity(size : u32) -> Self {
+        let mut values = vec![T::zero(); (size*size) as usize];
+        for k in 0..size    {
+            values[(k*size +k) as usize] = T::one();
+        }
+        return Self {nrows : size, ncols : size, values}
+    }
 }
 
 
@@ -49,8 +57,6 @@ impl<T : num::Num + Default + Clone + Copy> std::ops::Index<(u32,u32)> for Matri
 //    pub fn from_array() {
 //    }
 //}
-
-
 
 // TODO : Implement a clone method 
 impl<T : num::Num + Default + Clone + Copy> Clone for Matrix_t<T> {
