@@ -5,7 +5,7 @@ Here shall be listed every elements I thoughts of for this project
 
 ### Matrices
 - implementation as a struct 
-    - representation of a matrice through basic types 
+    - representation of a matrice through basic types       
 - methods associated : 
     - creation 
     - determinant 
@@ -14,5 +14,6 @@ Here shall be listed every elements I thoughts of for this project
 - overloading of operators :
     - sum 
     - product
+    - clone 
 - handling errors : 
     - errors when summing two matrices of differentes sizes       
