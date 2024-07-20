@@ -68,7 +68,7 @@ impl<T : num::Num + Default + Clone + Copy> std::ops::IndexMut<(u32,u32)> for Ma
 
     fn index_mut(&mut self, index : (u32,u32)) -> &mut Self::Output {
         let (row,col) : (u32,u32) = index;
-        let idx = self.index(row,col);
+        let idx : usize = self.index(row,col);
         return &mut self.values[idx];
     }
 }
@@ -87,7 +87,10 @@ impl<T : num::Num + Default + Clone + std::fmt::Debug + Copy> std::fmt::Display 
         let mut res : String = String::new();
         for i in 0..self.nrows {
             for j in 0..self.ncols {
-               res.push_str(&format!("{:?}",self[(i,j)])); 
+                res.push_str(&format!("{:?}",self[(i,j)])); 
+                if j != self.ncols {
+                    res.push_str(" ");
+                }
             }
             res.push_str("\n");
         }
@@ -109,10 +112,13 @@ impl<T : num::Num + Default + Clone + Copy> std::ops::Add<&Matrix_t<T> > for &Ma
 
 // TODO : Add a method to compute product of two matrices
 
-impl<T : num::Num + Default + Clone + Copy> std::ops::Mul<&Matrix_t<T> > for &Matrix_t<T> {
+impl<T,U> std::ops::Mul<&Matrix_t<U> > for &Matrix_t<T>
+    where 
+    T: num::Num + Default + Clone + Copy + num::NumCast,
+    U: num::Num + Default + Clone + Copy + num::NumCast {
     type Output = Matrix_t<T>;
   
-    fn mul(self, mat2 : &Matrix_t<T>) -> Matrix_t<T> {
+    fn mul(self, mat2 : &Matrix_t<U>) -> Matrix_t<T> {
         assert!(self.ncols == mat2.nrows);
         let nrows : u32 = self.nrows;
         let ncols : u32 = mat2.ncols;
@@ -122,7 +128,9 @@ impl<T : num::Num + Default + Clone + Copy> std::ops::Mul<&Matrix_t<T> > for &Ma
         for i in 0..nrows {
             for j in 0..ncols {
                 for k in 0..mat2.nrows {
-                    prod_mat[(i,j)] = prod_mat[(i,j)] + self[(i,k)]*mat2[(k,j)];
+                    let left = num::NumCast::from(self[(i, k)]).unwrap() ;
+                    let right = num::NumCast::from(mat2[(k, j)]).unwrap();
+                    prod_mat[(i,j)] = prod_mat[(i,j)] + left + right;
                 }
             }
         }
