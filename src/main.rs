@@ -1,13 +1,23 @@
 mod matrices;
 
 fn main() {
-    let vec_val = vec![1,1,1,1,1,1,1,1,1];
-    let nrows : u32 = 3;
-    let ncols : u32 = 3;
-    let mat1 = matrices::Matrix_t::new(nrows,ncols,vec_val);
-    println!("matrix of One = \n{}", mat1);
-    let mat_identity : matrices::Matrix_t<i32> = matrices::Matrix_t::new_identity(3);
-    println!("identity matrix = \n{}", mat_identity);
-    let sum_mat = &mat_identity + &mat1;
-    println!("sum matrix = \n{}", sum_mat);
+    let arr = [[0;4], [1;4], [1,2,3,4]];
+    println!("array of array : ");
+    println!("{:?}", arr);
+    println!("len : {}", arr.len());
+    let nrows : u32 = arr.len() as u32;
+    let ncols : u32 = arr[0].len() as u32;
+    let mut vec : Vec<i32>= Vec::new();
+
+    for k in 0..nrows as usize{
+        for j in 0..ncols as usize{
+            vec.push(arr[k][j]);
+        }
+    }
+    println!("{:?}",vec);
+
+    let mat_from_arr = matrices::Matrix_t::from_array(arr);
+    println!("matrix from arr");
+    println!("{}",mat_from_arr);
+    
 }

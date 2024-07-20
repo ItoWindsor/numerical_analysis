@@ -12,7 +12,7 @@ impl<T : num::Num + Default + Clone + Copy> Matrix_t<T> {
     }
 
     pub fn new_empty(nrows : u32, ncols : u32) -> Self { 
-        let values = vec![T::default(); (nrows*ncols) as usize];
+        let values = vec![T::zero(); (nrows*ncols) as usize];
         return Self {nrows, ncols, values};
     }
 
@@ -22,6 +22,20 @@ impl<T : num::Num + Default + Clone + Copy> Matrix_t<T> {
             values[(k*size +k) as usize] = T::one();
         }
         return Self {nrows : size, ncols : size, values}
+    }
+
+    pub fn from_array<const M: usize, const N: usize>(arr: [[T; N]; M]) -> Self {
+        let nrows = M as u32;
+        let ncols = N as u32;
+        let mut values = Vec::with_capacity((nrows * ncols) as usize);
+
+        for row in arr.iter() {
+            for elem in row.iter() {
+                values.push(elem.clone());
+            }
+        }
+
+        Self { nrows, ncols, values }
     }
 }
 
@@ -53,10 +67,6 @@ impl<T : num::Num + Default + Clone + Copy> std::ops::Index<(u32,u32)> for Matri
 
 // TODO : Add a method to create a matrix from an array of array ( [ [0,1,2],[3,4,5],[6,7,8]  ] )
 
-//impl<T : num::Num + Default + Clone + Copy> Matrix_t<T> 
-//    pub fn from_array() {
-//    }
-//}
 
 // TODO : Implement a clone method 
 impl<T : num::Num + Default + Clone + Copy> Clone for Matrix_t<T> {
