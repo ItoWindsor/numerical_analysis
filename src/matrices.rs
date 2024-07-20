@@ -27,7 +27,7 @@ impl<T : num::Num + Default + Clone + Copy> Matrix_t<T> {
     pub fn from_array<const M: usize, const N: usize>(arr: [[T; N]; M]) -> Self {
         let nrows = M as u32;
         let ncols = N as u32;
-        let mut values = Vec::with_capacity((nrows * ncols) as usize);
+        let mut values : Vec<T> = Vec::with_capacity((nrows * ncols) as usize);
 
         for row in arr.iter() {
             for elem in row.iter() {
@@ -64,9 +64,14 @@ impl<T : num::Num + Default + Clone + Copy> std::ops::Index<(u32,u32)> for Matri
     }
 }
 
+impl<T : num::Num + Default + Clone + Copy> std::ops::IndexMut<(u32,u32)> for Matrix_t<T> {
 
-// TODO : Add a method to create a matrix from an array of array ( [ [0,1,2],[3,4,5],[6,7,8]  ] )
-
+    fn index_mut(&mut self, index : (u32,u32)) -> &mut Self::Output {
+        let (row,col) : (u32,u32) = index;
+        let idx = self.index(row,col);
+        return &mut self.values[idx];
+    }
+}
 
 // TODO : Implement a clone method 
 impl<T : num::Num + Default + Clone + Copy> Clone for Matrix_t<T> {
@@ -103,11 +108,24 @@ impl<T : num::Num + Default + Clone + Copy> std::ops::Add<&Matrix_t<T> > for &Ma
 }
 
 // TODO : Add a method to compute product of two matrices
-//
-// impl<T> std::ops::Mul<Matrices_t<T> > for Matrices_t<T> {
-//  type Output = Matrices_t<T>;
-//  
-//  fn mul(self, mat2 : Matrices_t<T>) -> Matrices_t<T> {
-//      // assert!(self.ncols == mat2.nrows);
-//  }
-// }
+
+impl<T : num::Num + Default + Clone + Copy> std::ops::Mul<&Matrix_t<T> > for &Matrix_t<T> {
+    type Output = Matrix_t<T>;
+  
+    fn mul(self, mat2 : &Matrix_t<T>) -> Matrix_t<T> {
+        assert!(self.ncols == mat2.nrows);
+        let nrows : u32 = self.nrows;
+        let ncols : u32 = mat2.ncols;
+
+        let values = vec![T::zero(); (nrows*ncols) as usize];
+        let mut prod_mat = Matrix_t::new(nrows, ncols, values);
+        for i in 0..nrows {
+            for j in 0..ncols {
+                for k in 0..mat2.nrows {
+                    prod_mat[(i,j)] = prod_mat[(i,j)] + self[(i,k)]*mat2[(k,j)];
+                }
+            }
+        }
+        return prod_mat;
+    }
+ }
