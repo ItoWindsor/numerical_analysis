@@ -1,3 +1,19 @@
+pub trait CommonType_t<T,U> {
+    type Output;
+}
+
+impl<T> CommonType_t<T,T> for () {
+    type Output = T;
+}
+
+impl CommonType_t<i32,f64> for () {
+    type Output = f64;
+}
+
+impl CommonType_t<f64,i32> for () {
+    type Output = f64;
+}
+
 pub struct Matrix_t<T : num::Num + Default + Clone + Copy> {
     nrows : u32,
     ncols : u32,
@@ -99,41 +115,71 @@ impl<T : num::Num + Default + Clone + std::fmt::Debug + Copy> std::fmt::Display 
 }
 
 // TODO : Add a method to sum two matrices
-impl<T : num::Num + Default + Clone + Copy> std::ops::Add<&Matrix_t<T> > for &Matrix_t<T> {
-    type Output = Matrix_t<T>;
-    fn add(self, mat2 : &Matrix_t<T>) -> Matrix_t<T> {
+impl<T,U,V> std::ops::Add<&Matrix_t<U>> for &Matrix_t<T>
+    where 
+    T: num::Num + Default + Clone + Copy + num::NumCast,
+    U: num::Num + Default + Clone + Copy + num::NumCast,
+    () : CommonType_t<T,U, Output = V>,
+    V: num::Num + Default + Clone + Copy + num::NumCast {
+    type Output = Matrix_t<V>;
+
+    fn add(self, mat2 : &Matrix_t<U>) -> Matrix_t<V> {
         assert!((self.nrows == mat2.nrows) & (self.ncols == mat2.ncols));
-        let vec1 : Vec<T> = self.values.clone();
-        let vec2 : Vec<T> = mat2.values.clone();
-        let new_vec : Vec<T> = vec1.into_iter().zip(vec2.into_iter()).map(|(a,b)| a+b).collect();
-       return Matrix_t {nrows : self.nrows, ncols : self.ncols, values : new_vec};
+        let values: Vec<V> = self.values.iter().zip(mat2.values.iter())
+            .map(|(&a, &b)| {
+                let a_as_v: V = num::NumCast::from(a).unwrap();
+                let b_as_v: V = num::NumCast::from(b).unwrap();
+                a_as_v + b_as_v
+            })
+            .collect();
+        return Matrix_t {nrows : self.nrows,ncols : self.ncols,values};
+
     }
 }
 
+//impl<T,U> std::ops::Add<&Matrix_t<U> > for &Matrix_t<T> 
+//    where 
+//    T: num::Num + Default + Clone + Copy + num::NumCast,
+//    U: num::Num + Default + Clone + Copy + num::NumCast {
+//    type Output = Matrix_t<T>;
+//    fn add(self, mat2 : &Matrix_t<U>) -> Matrix_t<T> {
+//        assert!((self.nrows == mat2.nrows) & (self.ncols == mat2.ncols));
+//        let vec1 : Vec<T> = self.values.clone();
+//        let vec2 : Vec<U> = mat2.values.clone();
+//        let new_vec : Vec<T> = vec1.into_iter().zip(vec2.into_iter()).map(|(a,b)| a+b).collect();
+//       return Matrix_t {nrows : self.nrows, ncols : self.ncols, values : new_vec};
+//    }
+//}
+
 // TODO : Add a method to compute product of two matrices
 
-impl<T,U> std::ops::Mul<&Matrix_t<U> > for &Matrix_t<T>
+impl<T,U, V> std::ops::Mul<&Matrix_t<U> > for &Matrix_t<T>
     where 
     T: num::Num + Default + Clone + Copy + num::NumCast,
-    U: num::Num + Default + Clone + Copy + num::NumCast {
-    type Output = Matrix_t<T>;
+    U: num::Num + Default + Clone + Copy + num::NumCast,
+    () : CommonType_t<T,U, Output = V>, 
+    V : num::Num + Default + Clone + Copy + num::NumCast {
+    type Output = Matrix_t<V>;
   
-    fn mul(self, mat2 : &Matrix_t<U>) -> Matrix_t<T> {
+    fn mul(self, mat2 : &Matrix_t<U>) -> Matrix_t<V> {
         assert!(self.ncols == mat2.nrows);
         let nrows : u32 = self.nrows;
         let ncols : u32 = mat2.ncols;
 
-        let values = vec![T::zero(); (nrows*ncols) as usize];
-        let mut prod_mat = Matrix_t::new(nrows, ncols, values);
+        let values = vec![V::zero(); (nrows*ncols) as usize];
+        let mut prod_mat : Matrix_t<V> = Matrix_t::new(nrows, ncols, values);
+        
         for i in 0..nrows {
             for j in 0..ncols {
                 for k in 0..mat2.nrows {
-                    let left = num::NumCast::from(self[(i, k)]).unwrap() ;
-                    let right = num::NumCast::from(mat2[(k, j)]).unwrap();
-                    prod_mat[(i,j)] = prod_mat[(i,j)] + left + right;
+                    let left : V = num::NumCast::from(self[(i, k)]).unwrap() ;
+                    let right : V = num::NumCast::from(mat2[(k, j)]).unwrap();
+                    prod_mat[(i,j)] = prod_mat[(i,j)] + left*right;
                 }
             }
+        
         }
         return prod_mat;
     }
- }
+ 
+}
