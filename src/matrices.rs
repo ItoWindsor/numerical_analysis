@@ -1,18 +1,6 @@
-pub trait CommonType_t<T,U> {
-    type Output;
-}
+#![allow(non_camel_case_types)]
 
-impl<T> CommonType_t<T,T> for () {
-    type Output = T;
-}
-
-impl CommonType_t<i32,f64> for () {
-    type Output = f64;
-}
-
-impl CommonType_t<f64,i32> for () {
-    type Output = f64;
-}
+pub use crate::common_type::CommonType_t;
 
 pub struct Matrix_t<T : num::Num + Default + Clone + Copy> {
     nrows : u32,
@@ -98,12 +86,12 @@ impl<T : num::Num + Default + Clone + Copy> Clone for Matrix_t<T> {
 
 
 // TODO: Add a method to show the matrix 
-impl<T : num::Num + Default + Clone + std::fmt::Debug + Copy> std::fmt::Display for Matrix_t<T> {
+impl<T : num::Num + Default + Clone + std::fmt::Display + Copy> std::fmt::Display for Matrix_t<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut res : String = String::new();
         for i in 0..self.nrows {
             for j in 0..self.ncols {
-                res.push_str(&format!("{:?}",self[(i,j)])); 
+                res.push_str(&format!("{}",self[(i,j)])); 
                 if j != self.ncols {
                     res.push_str(" ");
                 }
@@ -137,19 +125,6 @@ impl<T,U,V> std::ops::Add<&Matrix_t<U>> for &Matrix_t<T>
     }
 }
 
-//impl<T,U> std::ops::Add<&Matrix_t<U> > for &Matrix_t<T> 
-//    where 
-//    T: num::Num + Default + Clone + Copy + num::NumCast,
-//    U: num::Num + Default + Clone + Copy + num::NumCast {
-//    type Output = Matrix_t<T>;
-//    fn add(self, mat2 : &Matrix_t<U>) -> Matrix_t<T> {
-//        assert!((self.nrows == mat2.nrows) & (self.ncols == mat2.ncols));
-//        let vec1 : Vec<T> = self.values.clone();
-//        let vec2 : Vec<U> = mat2.values.clone();
-//        let new_vec : Vec<T> = vec1.into_iter().zip(vec2.into_iter()).map(|(a,b)| a+b).collect();
-//       return Matrix_t {nrows : self.nrows, ncols : self.ncols, values : new_vec};
-//    }
-//}
 
 // TODO : Add a method to compute product of two matrices
 
