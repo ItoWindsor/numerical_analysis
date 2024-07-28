@@ -2,14 +2,16 @@
 
 pub use crate::common_type::CommonType_t;
 
+#[derive(Debug)]
 pub struct Matrix_t<T : num::Num + Default + Clone + Copy> {
     nrows : u32,
     ncols : u32,
-    values : Vec<T>,
+    pub values : Vec<T>,
 }
 
 
-impl<T : num::Num + Default + Clone + Copy> Matrix_t<T> {
+impl<T> Matrix_t<T> 
+    where T : num::Num + Default + Clone + Copy  {
     pub fn new(nrows : u32, ncols : u32, values : Vec<T>) -> Matrix_t<T>{
         assert_eq!(values.len() as u32, nrows*ncols);
         return Self {nrows, ncols, values};
@@ -45,7 +47,8 @@ impl<T : num::Num + Default + Clone + Copy> Matrix_t<T> {
 
 
 // TODO : Add a method to get the shape of the matrix like np.shape() 
-impl<T : num::Num + Default + Clone + Copy> Matrix_t<T> {
+impl<T> Matrix_t<T> 
+    where T : num::Num + Default + Clone + Copy {
     pub fn get_shape(&self) -> (u32,u32) {
         let res : (u32,u32) = (self.nrows, self.ncols);
         return res;
@@ -113,15 +116,14 @@ impl<T,U,V> std::ops::Add<&Matrix_t<U>> for &Matrix_t<T>
 
     fn add(self, mat2 : &Matrix_t<U>) -> Matrix_t<V> {
         assert!((self.nrows == mat2.nrows) & (self.ncols == mat2.ncols));
-        let values: Vec<V> = self.values.iter().zip(mat2.values.iter())
+        let values: Vec<V> = self.values.iter()
+            .zip(mat2.values.iter())
             .map(|(&a, &b)| {
                 let a_as_v: V = num::NumCast::from(a).unwrap();
                 let b_as_v: V = num::NumCast::from(b).unwrap();
-                a_as_v + b_as_v
-            })
+                a_as_v + b_as_v })
             .collect();
         return Matrix_t {nrows : self.nrows,ncols : self.ncols,values};
-
     }
 }
 
@@ -155,6 +157,21 @@ impl<T,U, V> std::ops::Mul<&Matrix_t<U> > for &Matrix_t<T>
         
         }
         return prod_mat;
+    } 
+}
+
+
+impl<T> PartialEq<Matrix_t<T>> for Matrix_t<T> 
+    where 
+    T : num::Num + Default + Clone + Copy {
+
+    fn eq(&self ,other : &Matrix_t<T>) -> bool {
+        if self.nrows != other.nrows {
+            return false;
+        }
+        if self.ncols != other.ncols {
+            return false;
+        }
+            return self.values == other.values;
     }
- 
 }
