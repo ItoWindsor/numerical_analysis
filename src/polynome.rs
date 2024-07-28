@@ -2,10 +2,11 @@
 
 use std::collections::HashMap;       
 
-//use crate::common_type::CommonType_t;
+use crate::common_type::CommonType_t;
 
-pub struct Polynome_t<T : num::Num + Default + Clone + Copy> {
-    deg_to_coeff : HashMap<u32, T>,
+pub struct Polynome_t<T> 
+    where T : num::Num + Default + Clone + Copy {
+        deg_to_coeff : HashMap<u32, T>,
 }
 
 impl<T : num::Num + Default + Clone + Copy> Polynome_t<T> {
@@ -36,7 +37,7 @@ impl<T : num::Num + Default + Clone + Copy> Polynome_t<T> {
 //    type Output = Polynome_t<V>;
 //
 //    fn add(self, poly2 : &Polynome_t<U>) -> Polynome_t<V> {
-//        
+//          
 //    }
 //}
 
@@ -82,10 +83,3 @@ impl <T : num::Num + Default + Clone + std::fmt::Display + Copy + std::cmp::Part
         return write!(f,"{}",res);
     }
 }
-
-
-
-
-
-
-
